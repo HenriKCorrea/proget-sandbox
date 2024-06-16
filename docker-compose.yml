@@ -1,0 +1,15 @@
+version: "3"
+services:
+  inedo-sql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=«YourStrong!Passw0rd»
+      - MSSQL_PID=Express
+    networks:
+      - inedo
+    restart: unless-stopped
+
+
+networks:
+  inedo:
