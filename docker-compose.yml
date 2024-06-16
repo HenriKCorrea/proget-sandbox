@@ -3,12 +3,51 @@ services:
     image: mcr.microsoft.com/mssql/server:2019-latest
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=«YourStrong!Passw0rd»
       - MSSQL_PID=Express
+    env_file:
+      - .env
     networks:
       - inedo
     restart: unless-stopped
-
-
+  proget:
+    image: proget.inedo.com/productimages/inedo/proget:latest
+    restart: unless-stopped
+    volumes:
+      - proget-packages:/var/proget/packages
+    ports:
+      - 80:80
+    networks:
+      - inedo
+    env_file:
+      - .env
+    depends_on:
+      - inedo-sql
+  buildmaster:
+    image: proget.inedo.com/productimages/inedo/buildmaster:latest
+    restart: unless-stopped
+    volumes:
+      - buildmaster-artifacts:/var/buildmaster/artifacts
+    ports:
+      - 81:80
+    networks:
+      - inedo
+    env_file:
+      - .env
+    depends_on:
+      - inedo-sql
+  otter:
+    image: proget.inedo.com/productimages/inedo/otter:latest
+    restart: unless-stopped
+    ports:
+      - 82:80
+    networks:
+      - inedo
+    env_file:
+      - .env
+    depends_on:
+      - inedo-sql
 networks:
   inedo:
+volumes:
+  proget-packages:
+  buildmaster-artifacts:
