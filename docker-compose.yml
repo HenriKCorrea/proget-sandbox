@@ -1,53 +1,69 @@
 services:
-  inedo-sql:
+  db:
     image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: inedo-sql
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_PID=Express
     env_file:
       - .env
     networks:
-      - inedo
+      inedo:
+        aliases:
+          - inedo-sql
     restart: unless-stopped
-  proget:
+  # Optional if using persisted storage locations (https://docs.microsoft.com/en-us/sql/linux/sql-server-linux-docker-container-configure?view=sql-server-ver15&pivots=cs1-bash#persist)
+    volumes:
+      - sqlvolume:/var/opt/mssql
+  pg:
     image: proget.inedo.com/productimages/inedo/proget:latest
+    container_name: proget
     restart: unless-stopped
     volumes:
       - proget-packages:/var/proget/packages
     ports:
       - 80:80
     networks:
-      - inedo
+      inedo:
+        aliases:
+          - proget
     env_file:
       - .env
     depends_on:
-      - inedo-sql
-  buildmaster:
+      - db
+  bm:
     image: proget.inedo.com/productimages/inedo/buildmaster:latest
+    container_name: buildmaster
     restart: unless-stopped
     volumes:
       - buildmaster-artifacts:/var/buildmaster/artifacts
     ports:
       - 81:80
     networks:
-      - inedo
+      inedo:
+        aliases:
+          - buildmaster
     env_file:
       - .env
     depends_on:
-      - inedo-sql
-  otter:
+      - db
+  ot:
     image: proget.inedo.com/productimages/inedo/otter:latest
+    container_name: otter
     restart: unless-stopped
     ports:
       - 82:80
     networks:
-      - inedo
+      inedo:
+        aliases:
+          - otter
     env_file:
       - .env
     depends_on:
-      - inedo-sql
+      - db
 networks:
   inedo:
 volumes:
+  sqlvolume:
   proget-packages:
   buildmaster-artifacts:
