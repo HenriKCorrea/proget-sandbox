@@ -14,13 +14,13 @@ databases+=("ProGet")
 
 for db in "${databases[@]}"; do
   # Check if database exists
-  DB_EXISTS=$(podman.exe exec inedo-sql /opt/mssql-tools18/bin/sqlcmd \
+  DB_EXISTS=$(docker exec inedo-sql /opt/mssql-tools18/bin/sqlcmd \
     -C -S localhost -U SA -P ${MSSQL_SA_PASSWORD} \
     -Q 'SELECT name FROM sys.databases' | grep -w "$db")
 
   if [ -z "$DB_EXISTS" ]; then
     echo "Creating $db database..."
-    podman.exe exec inedo-sql /opt/mssql-tools18/bin/sqlcmd \
+    docker exec inedo-sql /opt/mssql-tools18/bin/sqlcmd \
       -C -S localhost -U SA -P ${MSSQL_SA_PASSWORD} \
       -Q "CREATE DATABASE [$db] COLLATE SQL_Latin1_General_CP1_CI_AS"
   else
